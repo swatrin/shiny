@@ -6422,6 +6422,29 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       return x.value;
     });
 
+    function getComputedBgColor(el) {
+      if (!el) {
+        // Top of document, can't recurse further
+        return null;
+      }
+
+      var props = window.getComputedStyle(el);
+      var bgColor = props.getPropertyValue("background-color");
+      var m = bgColor.match(/^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/);
+      if (bgColor === "transparent" || m && parseFloat(m[4]) === 0) {
+        // No background color on this element. See if it has a background image.
+        var bgImage = props.getPropertyValue("background-image");
+        if (bgImage && bgImage !== "none") {
+          // Failed to detect background color, since it has a background image
+          return null;
+        } else {
+          // Recurse
+          return getComputedBgColor(el.parentElement);
+        }
+      }
+      return bgColor;
+    }
+
     // The server needs to know the size of each image and plot output element,
     // in case it is auto-sizing
     $('.shiny-image-output, .shiny-plot-output, .shiny-report-size').each(function () {
@@ -6429,6 +6452,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
         initialValues['.clientdata_output_' + id + '_width'] = this.offsetWidth;
         initialValues['.clientdata_output_' + id + '_height'] = this.offsetHeight;
+        initialValues['.clientdata_output_' + id + '_bg'] = getComputedBgColor(this);
+        initialValues['.clientdata_output_' + id + '_fg'] = window.getComputedStyle(this).getPropertyValue("color");
       }
     });
     function doSendImageSize() {
@@ -6437,6 +6462,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
           inputs.setInput('.clientdata_output_' + id + '_width', this.offsetWidth);
           inputs.setInput('.clientdata_output_' + id + '_height', this.offsetHeight);
+          inputs.setInput('.clientdata_output_' + id + '_bg', getComputedBgColor(this));
+          inputs.setInput('.clientdata_output_' + id + '_fg', window.getComputedStyle(this).getPropertyValue("color"));
         }
       });
       $('.shiny-bound-output').each(function () {
