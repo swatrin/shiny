@@ -52,6 +52,7 @@ FileUploadOperation <- R6Class(
                             size=numeric(),
                             type=character(),
                             datapath=character(),
+                            lastmodified=character(),
                             stringsAsFactors=FALSE)
       .dir <<- dir
       .pendingFileInfos <<- fileInfos
@@ -67,7 +68,7 @@ FileUploadOperation <- R6Class(
       fileBasename <- basename(.currentFileInfo$name)
       filename <- file.path(.dir, paste0(as.character(length(.files$name)), maybeGetExtension(fileBasename)))
       row <- data.frame(name=fileBasename, size=file$size, type=file$type,
-                        datapath=filename, stringsAsFactors=FALSE)
+                        datapath=filename, lastmodified = file$lastModified, stringsAsFactors=FALSE)
 
       if (length(.files$name) == 0)
         .files <<- row
