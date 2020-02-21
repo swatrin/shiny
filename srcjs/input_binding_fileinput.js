@@ -125,7 +125,8 @@ $.extend(FileUploader.prototype, FileProcessor.prototype);
       return {
         name: file.name,
         size: file.size,
-        type: file.type
+        type: file.type,
+        lastModified: file.lastModified
       };
     });
 
